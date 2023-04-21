@@ -10,7 +10,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/mysql-connector.jar!/" />
+          <root url="jar://$MODULE_DIR$/src/librairies/bttp2.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -19,7 +19,16 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/service.jar!/" />
+          <root url="jar://$MODULE_DIR$/src/librairies/serveur.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/src/librairies/mysql-connector.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

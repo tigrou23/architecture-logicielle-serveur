@@ -1,5 +1,9 @@
 package doc;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.Period;
+import java.time.ZoneOffset;
 import java.util.Date;
 
 public class Abonne {
@@ -14,11 +18,21 @@ public class Abonne {
         this.dateNaissance = dateNaissance;
     }
 
+    public boolean estAdulte() {
+        ZoneOffset zoneOffset = ZoneOffset.ofTotalSeconds(this.dateNaissance.getTimezoneOffset() * -60);
+        Instant instant = Instant.ofEpochMilli(this.dateNaissance.getTime());
+        LocalDate dateNaissance = instant.atOffset(zoneOffset).toLocalDate();
+        LocalDate aujourdHui = LocalDate.now();
+        Period age = Period.between(dateNaissance, aujourdHui);
+        return age.getYears() >= 18;
+    }
+
     public String toString() {
         return "Abonne{" +
                 "numero=" + numero +
                 ", nom='" + nom + '\'' +
                 ", dateNaissance=" + dateNaissance +
+                ", majeur=" + estAdulte() +
                 '}';
     }
 }

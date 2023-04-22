@@ -13,14 +13,16 @@ import java.util.ArrayList;
 import java.util.Properties;
 
 public class Connect {
-    private static ArrayList<Document> listeDocument;
-    private static ArrayList<Abonne> listeAbonne;
+    private final static ArrayList<Document> listeDocument;
+    private final static ArrayList<Abonne> listeAbonne;
     private final String CONFIG_PATH = "src/ressources/config.properties";
     private Connection conn;
 
-    public Connect(){
+    static{
         listeDocument = new ArrayList<>();
         listeAbonne = new ArrayList<>();
+    }
+    public Connect(){
 
         try{
             Properties properties = new Properties();
@@ -87,4 +89,5 @@ public class Connect {
     public static ArrayList<Abonne> getListeAbonne() {
         return listeAbonne;
     }
+
 }

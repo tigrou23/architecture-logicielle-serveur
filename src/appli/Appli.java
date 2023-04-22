@@ -1,11 +1,13 @@
 package appli;
 
-import java.io.IOException;
+import doc.Dvd;
 import serveur.Serveur;
 import services.ServiceEmprunt;
 import services.ServiceReservation;
 import services.ServiceRetour;
-import java.sql.*;
+
+import java.io.IOException;
+import java.sql.SQLException;
 
 class Appli {
     private final static int PORT_RESERVATION = 1000;

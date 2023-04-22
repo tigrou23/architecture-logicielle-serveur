@@ -39,4 +39,11 @@ public class Dvd implements Document{
     public void retour() {
 
     }
+
+    public String toString() {
+        return "Dvd{" +
+                "titre='" + titre + '\'' +
+                ", adulte=" + adulte +
+                '}';
+    }
 }

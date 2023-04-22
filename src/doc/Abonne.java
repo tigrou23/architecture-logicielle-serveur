@@ -13,4 +13,12 @@ public class Abonne {
         this.nom = nom;
         this.dateNaissance = dateNaissance;
     }
+
+    public String toString() {
+        return "Abonne{" +
+                "numero=" + numero +
+                ", nom='" + nom + '\'' +
+                ", dateNaissance=" + dateNaissance +
+                '}';
+    }
 }

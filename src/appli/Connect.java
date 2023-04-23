@@ -35,20 +35,8 @@ public class Connect {
 
             Class.forName("com.mysql.jdbc.Driver");
             conn = DriverManager.getConnection("jdbc:mysql://" + properties.getProperty("server.address") + ":" + properties.getProperty("server.port") + "/" + properties.getProperty("server.database"), properties.getProperty("server.username"), properties.getProperty("server.password"));
+
             Statement stmt = conn.createStatement();
-            ResultSet dvd_res = stmt.executeQuery("SELECT * FROM dvd inner join document d on dvd.ID_dvd = d.ID_document");
-
-            Document dvd = null;
-
-            while (dvd_res.next()) {
-                dvd = new Dvd(dvd_res.getInt(3), dvd_res.getString(4), dvd_res.getBoolean(2));
-                listeDocument.put(dvd.numero(),dvd);
-            }
-
-            dvd_res.close();
-            stmt.close();
-
-            stmt = conn.createStatement();
             ResultSet abonne_res = stmt.executeQuery("SELECT * FROM abonne");
 
             Abonne abonne = null;
@@ -60,6 +48,33 @@ public class Connect {
 
             abonne_res.close();
             stmt.close();
+
+            stmt = conn.createStatement();
+            ResultSet dvd_res = stmt.executeQuery("select * from vue_dvd;");
+
+            Document dvd = null;
+            Integer reservePar = null;
+            Integer empruntePar = null;
+
+            while (dvd_res.next()) {
+                reservePar = dvd_res.getInt(6);
+                empruntePar = dvd_res.getInt(4);
+                if(reservePar != 0){
+                    dvd = new Dvd(dvd_res.getInt(1), dvd_res.getString(2), listeAbonne.get(reservePar), dvd_res.getBoolean(3));
+                    System.out.println("reservation " + dvd);
+                }
+                else if(empruntePar != 0){
+                    dvd = new Dvd(dvd_res.getInt(1), dvd_res.getString(2), dvd_res.getBoolean(3), listeAbonne.get(empruntePar));
+                    System.out.println("emprunt " + dvd);
+                }else{
+                    dvd = new Dvd(dvd_res.getInt(1), dvd_res.getString(2), dvd_res.getBoolean(3));
+                }
+                listeDocument.put(dvd.numero(),dvd);
+            }
+
+            dvd_res.close();
+            stmt.close();
+
             inputStream.close();
         }catch (Exception e){
             e.printStackTrace();

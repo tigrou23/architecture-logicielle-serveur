@@ -13,11 +13,28 @@ public class Dvd implements Document{
     private Abonne reservePar;
     private Abonne empruntePar;
 
+    public Dvd(Integer numero, String titre, boolean adulte, Abonne empruntePar) {
+        this.numero = numero;
+        this.titre = titre;
+        this.adulte = adulte;
+        this.reservePar = null;
+        this.empruntePar = empruntePar;
+    }
+
+    public Dvd(Integer numero, String titre, Abonne reservePar, boolean adulte) {
+        this.numero = numero;
+        this.titre = titre;
+        this.adulte = adulte;
+        this.reservePar = reservePar;
+        this.empruntePar = null;
+    }
+
     public Dvd(Integer numero, String titre, boolean adulte) {
         this.numero = numero;
         this.titre = titre;
         this.adulte = adulte;
-        reservePar = null;
+        this.reservePar = null;
+        this.empruntePar = null;
     }
 
     @Override

@@ -86,7 +86,13 @@ public class Connect {
         return bool;
     }
 
-    public static void emprunt(Document doc, Abonne ab) {
+    public static boolean emprunt(Document doc, Abonne ab) throws SQLException {
+        Statement stmt = conn.createStatement();
+        Date aujourdhui = new Date();
+        SimpleDateFormat formater = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        boolean bool = stmt.execute("SELECT emprunter(" + doc.numero() + ", " + ab.numero() + ", '" + formater.format(aujourdhui) +"') from DUAL;");
+        stmt.close();
+        return bool;
     }
 
     public static boolean retour(Document doc) throws SQLException {

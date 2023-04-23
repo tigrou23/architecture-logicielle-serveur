@@ -68,10 +68,16 @@ public class Dvd implements Document{
 
     @Override
     public void emprunt(Abonne ab) {
-        //TODO: ajouter les preconditions
-        empruntePar = ab;
-        reservePar = null;
-        Connect.emprunt(this, ab);
+        try{
+            if(Connect.emprunt(this, ab)){
+                empruntePar = ab;
+                reservePar = null;
+            }else{
+                System.err.println("Pb avec la base de données lors du retour.");
+            }
+        }catch (SQLException e){
+            System.err.println("Pb avec la base de données lors du retour : " +  e);
+        }
     }
 
     @Override

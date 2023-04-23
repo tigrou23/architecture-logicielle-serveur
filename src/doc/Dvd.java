@@ -54,9 +54,16 @@ public class Dvd implements Document{
 
     @Override
     public void reservation(Abonne ab) {
-        //TODO: ajouter les preconditions
-        reservePar = ab;
-        Connect.reservation(this, ab);
+        try{
+            if(Connect.reservation(this, ab)){
+                empruntePar = null;
+                reservePar = ab;
+            }else{
+                System.err.println("Pb avec la base de données lors du retour.");
+            }
+        }catch (SQLException e){
+            System.err.println("Pb avec la base de données lors du retour : " +  e);
+        }
     }
 
     @Override
@@ -86,5 +93,13 @@ public class Dvd implements Document{
                 "titre='" + titre + '\'' +
                 ", adulte=" + adulte +
                 '}';
+    }
+
+    public String titre() {
+        return titre;
+    }
+
+    public boolean pourAdulte() {
+        return adulte;
     }
 }

@@ -39,4 +39,8 @@ public class Abonne {
                 ", majeur=" + estAdulte() +
                 '}';
     }
+
+    public String nom() {
+        return nom;
+    }
 }

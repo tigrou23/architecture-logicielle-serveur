@@ -27,6 +27,10 @@ public class Abonne {
         return age.getYears() >= 18;
     }
 
+    public int numero() {
+        return numero;
+    }
+
     public String toString() {
         return "Abonne{" +
                 "numero=" + numero +

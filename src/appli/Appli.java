@@ -1,6 +1,5 @@
 package appli;
 
-import doc.Dvd;
 import serveur.Serveur;
 import services.ServiceEmprunt;
 import services.ServiceReservation;
@@ -29,6 +28,6 @@ class Appli {
             System.err.println("Pb lors de la création du serveur : " +  e);
         }
         Connect connect = new Connect();
-        connect.closeConnection();
+        //connect.closeConnection();
     }
 }

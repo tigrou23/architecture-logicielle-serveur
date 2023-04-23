@@ -5,22 +5,26 @@ import doc.Document;
 import doc.Dvd;
 
 import java.io.FileInputStream;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Properties;
+import java.io.PrintWriter;
+import java.sql.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.Date;
+
+//TODO: PRENDRE EN COMPTE LES EMPRUNTS ET LES RESERVATIONS LORS DE LA CONNEXION A LA BASE DE DONNEES
+//TODO: COMPLETER LES METHODES DE LA CLASSE CONNECT AVEC CELLES DE DVD
 
 public class Connect {
-    private final static ArrayList<Document> listeDocument;
-    private final static ArrayList<Abonne> listeAbonne;
+    //TODO : Revoir type de liste pour listeDocument et listeAbonne
+    private final static Map<Integer,Document> listeDocument;
+    private final static Map<Integer,Abonne> listeAbonne;
     private final String CONFIG_PATH = "src/ressources/config.properties";
-    private Connection conn;
+    private static Connection conn;
 
     static{
-        listeDocument = new ArrayList<>();
-        listeAbonne = new ArrayList<>();
+        listeDocument = new HashMap<>();
+        listeAbonne = new HashMap<>();
     }
     public Connect(){
 
@@ -37,8 +41,8 @@ public class Connect {
             Document dvd = null;
 
             while (dvd_res.next()) {
-                dvd = new Dvd(dvd_res.getString(4), dvd_res.getBoolean(2));
-                listeDocument.add(dvd);
+                dvd = new Dvd(dvd_res.getInt(3), dvd_res.getString(4), dvd_res.getBoolean(2));
+                listeDocument.put(dvd.numero(),dvd);
             }
 
             dvd_res.close();
@@ -51,17 +55,7 @@ public class Connect {
 
             while (abonne_res.next()) {
                 abonne = new Abonne(abonne_res.getInt(1), abonne_res.getString(2), abonne_res.getDate(3));
-                listeAbonne.add(abonne);
-            }
-
-            //à retirer
-            for (Document d : listeDocument) {
-                System.out.println(d);
-            }
-
-            //à retirer
-            for (Abonne a : listeAbonne) {
-                System.out.println(a);
+                listeAbonne.put(abonne.numero(),abonne);
             }
 
             abonne_res.close();
@@ -70,6 +64,21 @@ public class Connect {
         }catch (Exception e){
             e.printStackTrace();
         }
+    }
+
+    public static void reservation(Document doc, Abonne ab) {
+    }
+
+    public static void emprunt(Document doc, Abonne ab) {
+    }
+
+    public static boolean retour(Document doc) throws SQLException {
+        Statement stmt = conn.createStatement();
+        Date aujourdhui = new Date();
+        SimpleDateFormat formater = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        boolean bool = stmt.execute("SELECT rendre(" + doc.numero() + ", '" + formater.format(aujourdhui) +"') from DUAL;");
+        stmt.close();
+        return bool;
     }
 
     public void closeConnection() {
@@ -82,11 +91,11 @@ public class Connect {
         }
     }
 
-    public static ArrayList<Document> getListeDocument() {
+    public static Map<Integer,Document> getListeDocument() {
         return listeDocument;
     }
 
-    public static ArrayList<Abonne> getListeAbonne() {
+    public static Map<Integer,Abonne> getListeAbonne() {
         return listeAbonne;
     }
 

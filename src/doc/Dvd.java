@@ -1,43 +1,68 @@
 package doc;
 
+import appli.Connect;
+
+import java.sql.Date;
+import java.sql.SQLException;
+
+
 public class Dvd implements Document{
     private final String titre;
-
+    private final Integer numero;
     private final boolean adulte;
+    private Abonne reservePar;
+    private Abonne empruntePar;
 
-    public Dvd(String titre, boolean adulte) {
+    public Dvd(Integer numero, String titre, boolean adulte) {
+        this.numero = numero;
         this.titre = titre;
         this.adulte = adulte;
+        reservePar = null;
     }
 
     @Override
     public int numero() {
-        return 0;
+        return numero;
     }
 
     @Override
     public Abonne empruntePar() {
-        return null;
+        return empruntePar;
     }
 
     @Override
     public Abonne reservePar() {
-        return null;
+        return reservePar;
     }
 
     @Override
     public void reservation(Abonne ab) {
-
+        //TODO: ajouter les preconditions
+        reservePar = ab;
+        Connect.reservation(this, ab);
     }
 
     @Override
     public void emprunt(Abonne ab) {
-
+        //TODO: ajouter les preconditions
+        empruntePar = ab;
+        reservePar = null;
+        Connect.emprunt(this, ab);
     }
 
     @Override
     public void retour() {
-
+        //TODO: ajouter les preconditions
+        try{
+            if(Connect.retour(this)){
+                empruntePar = null;
+                reservePar = null;
+            }else{
+                System.err.println("Pb avec la base de données lors du retour.");
+            }
+        }catch (SQLException e){
+            System.err.println("Pb avec la base de données lors du retour : " +  e);
+        }
     }
 
     public String toString() {

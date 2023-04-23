@@ -12,11 +12,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Date;
 
-//TODO: PRENDRE EN COMPTE LES EMPRUNTS ET LES RESERVATIONS LORS DE LA CONNEXION A LA BASE DE DONNEES
-//TODO: COMPLETER LES METHODES DE LA CLASSE CONNECT AVEC CELLES DE DVD
-
 public class Connect {
-    //TODO : Revoir type de liste pour listeDocument et listeAbonne
     private final static Map<Integer,Document> listeDocument;
     private final static Map<Integer,Abonne> listeAbonne;
     private final String CONFIG_PATH = "src/ressources/config.properties";

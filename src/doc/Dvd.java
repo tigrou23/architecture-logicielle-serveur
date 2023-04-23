@@ -69,7 +69,6 @@ public class Dvd implements Document{
 
     @Override
     public void retour() {
-        //TODO: ajouter les preconditions
         try{
             if(Connect.retour(this)){
                 empruntePar = null;

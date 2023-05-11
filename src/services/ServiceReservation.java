@@ -24,7 +24,7 @@ public class ServiceReservation extends Service {
         try {
             BufferedReader in = new BufferedReader(new InputStreamReader(getClient().getInputStream()));
             PrintWriter out = new PrintWriter(getClient().getOutputStream(), true);
-            out.println(Codage.encode("Entrez votre numéro client : "));
+            out.println(Codage.encode("*** Bienvenue dans le client de réservation de document ***\n" + "Entrez votre numéro client : "));
             int noClient = Integer.parseInt(Codage.decode(in.readLine()));
             String reponse = null;
             if (Connect.getListeAbonne().containsKey(noClient)){
@@ -59,7 +59,10 @@ public class ServiceReservation extends Service {
             else{
                 reponse = "Client non existant";
             }
-            out.println(reponse);
+            out.println("fin - " + reponse);
+            out.close();
+            in.close();
+            getClient().close();
         } catch (IOException e) {
             // Fin du service d'inversion
         }

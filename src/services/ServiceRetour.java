@@ -22,7 +22,7 @@ public class ServiceRetour extends Service {
             BufferedReader in = new BufferedReader(new InputStreamReader(getClient().getInputStream()));
             PrintWriter out = new PrintWriter(getClient().getOutputStream(), true);
 
-            out.println(Codage.encode("Entrez le numéro du document à retourner : "));
+            out.println(Codage.encode("*** Bienvenue dans le client de retour de document ***\n" + "Entrez le numéro du document à retourner : "));
             int noDocument = Integer.parseInt(Codage.decode(in.readLine()));
 
             String reponse = "Document non existant";
@@ -36,8 +36,10 @@ public class ServiceRetour extends Service {
                 }
             }
 
-            out.println(reponse);
-        } catch (IOException e) {
+            out.println("fin - " + reponse);
+            out.close();
+            in.close();
+            getClient().close();        } catch (IOException e) {
             // Fin du service d'inversion
         }
         try {

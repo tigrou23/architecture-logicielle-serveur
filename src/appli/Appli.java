@@ -5,15 +5,24 @@ import services.ServiceEmprunt;
 import services.ServiceReservation;
 import services.ServiceRetour;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Properties;
 
 class Appli {
-    private final static int PORT_RESERVATION = 1000;
-    private final static int PORT_EMPRUNT = 1001;
-    private final static int PORT_RETOUR = 1002;
+    private static final String CONFIG_PATH = "src/ressources/config.properties";
+
 
     public static void main(String[] args) throws ClassNotFoundException, SQLException, IOException {
+
+        Properties properties = new Properties();
+        FileInputStream inputStream = new FileInputStream(CONFIG_PATH);
+        properties.load(inputStream);
+        int PORT_RESERVATION = Integer.parseInt(properties.getProperty("service.reservation"));
+        int PORT_EMPRUNT = Integer.parseInt(properties.getProperty("service.emprunt"));
+        int PORT_RETOUR = Integer.parseInt(properties.getProperty("service.retour"));
+
         try {
             new Thread(new Serveur(ServiceReservation.class, PORT_RESERVATION)).start();
             System.out.println("Service réservation lancé sur le port " + PORT_RESERVATION);

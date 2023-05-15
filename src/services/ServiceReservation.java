@@ -20,7 +20,6 @@ public class ServiceReservation extends Service {
 
     @Override
     public void run() {
-        //TODO: IMPLEMENTER LE SERVICE RESERVATION
         try {
             BufferedReader in = new BufferedReader(new InputStreamReader(getClient().getInputStream()));
             PrintWriter out = new PrintWriter(getClient().getOutputStream(), true);

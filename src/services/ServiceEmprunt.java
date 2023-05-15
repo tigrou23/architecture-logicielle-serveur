@@ -13,6 +13,8 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 
+//TODO: check le temps réservation/emprunt et prévenir du temps d'attente
+
 public class ServiceEmprunt extends Service {
     public ServiceEmprunt(Socket socket) {
         super(socket);
@@ -20,14 +22,6 @@ public class ServiceEmprunt extends Service {
 
     @Override
     public void run() {
-        //TODO: IMPLEMENTER LE SERVICE EMPRUNT
-
-        //TODO: vérifier que le client existe
-        //TODO: vérifier que le document existe
-        //TODO: vérifier que le document n'est pas emprunté
-        //TODO: vérifier que le document n'est pas emprunté et si oui que ce n'est pas le client
-        //TODO: vérifier l'âge
-
         try {
             BufferedReader in = new BufferedReader(new InputStreamReader(getClient().getInputStream()));
             PrintWriter out = new PrintWriter(getClient().getOutputStream(), true);

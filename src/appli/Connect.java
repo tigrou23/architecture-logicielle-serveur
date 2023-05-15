@@ -2,12 +2,10 @@ package appli;
 
 import doc.Abonne;
 import doc.Document;
-import doc.Dvd;
+import doc.types.Dvd;
 
 import java.io.FileInputStream;
-import java.io.PrintWriter;
 import java.sql.*;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Date;
@@ -56,11 +54,11 @@ public class Connect {
                 reservePar = dvd_res.getInt(6);
                 empruntePar = dvd_res.getInt(4);
                 if(reservePar != 0){
-                    dvd = new Dvd(dvd_res.getInt(1), dvd_res.getString(2), listeAbonne.get(reservePar), dvd_res.getBoolean(3));
+                    dvd = new Dvd(dvd_res.getInt(1), dvd_res.getString(2), dvd_res.getBoolean(3), listeAbonne.get(reservePar));
                     System.out.println("reservation " + dvd);
                 }
                 else if(empruntePar != 0){
-                    dvd = new Dvd(dvd_res.getInt(1), dvd_res.getString(2), dvd_res.getBoolean(3), listeAbonne.get(empruntePar));
+                    dvd = new Dvd(dvd_res.getInt(1), dvd_res.getString(2), listeAbonne.get(empruntePar),dvd_res.getBoolean(3));
                     System.out.println("emprunt " + dvd);
                 }else{
                     dvd = new Dvd(dvd_res.getInt(1), dvd_res.getString(2), dvd_res.getBoolean(3));

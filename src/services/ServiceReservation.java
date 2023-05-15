@@ -4,7 +4,7 @@ import appli.Connect;
 import codage.Codage;
 import doc.Abonne;
 import doc.Document;
-import doc.Dvd;
+import doc.types.Dvd;
 import serveur.Service;
 
 import java.io.BufferedReader;

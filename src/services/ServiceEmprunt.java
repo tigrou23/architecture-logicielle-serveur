@@ -4,7 +4,7 @@ import appli.Connect;
 import codage.Codage;
 import doc.Abonne;
 import doc.Document;
-import doc.Dvd;
+import doc.types.Dvd;
 import serveur.Service;
 
 import java.io.BufferedReader;
@@ -39,16 +39,28 @@ public class ServiceEmprunt extends Service {
                     if (Connect.getListeDocument().get(noDocument).empruntePar() != null){
                         reponse = "Document déjà emprunté";
                     }
-                    else if (Connect.getListeDocument().get(noDocument).reservePar().numero() != client.numero()){
-                        reponse = "Document déjà réservé";
-                    }
                     else{
-                        if(type == Dvd.class){
-                            if(((Dvd) document).pourAdulte() && !client.estAdulte()){
-                                reponse = "Vous ne semblez pas avoir l'âge requis pour ce DVD...";
+                        if(Connect.getListeDocument().get(noDocument).reservePar() != null){
+                            if(Connect.getListeDocument().get(noDocument).reservePar().numero() != client.numero()){
+                                reponse = "Document déjà réservé";
                             }else{
-                                document.emprunt(client);
-                                reponse = "Document emprunté";
+                                if(type == Dvd.class){
+                                    if(((Dvd) document).pourAdulte() && !client.estAdulte()){
+                                        reponse = "Vous ne semblez pas avoir l'âge requis pour ce DVD...";
+                                    }else{
+                                        document.emprunt(client);
+                                        reponse = "Document emprunté";
+                                    }
+                                }
+                            }
+                        }else{
+                            if(type == Dvd.class){
+                                if(((Dvd) document).pourAdulte() && !client.estAdulte()){
+                                    reponse = "Vous ne semblez pas avoir l'âge requis pour ce DVD...";
+                                }else{
+                                    document.emprunt(client);
+                                    reponse = "Document emprunté";
+                                }
                             }
                         }
                     }

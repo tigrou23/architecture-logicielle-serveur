@@ -2,38 +2,32 @@ package doc;
 
 import appli.Connect;
 
-import java.sql.Date;
 import java.sql.SQLException;
 
-
-public class Dvd implements Document{
+public abstract class Doc implements Document{
     private final String titre;
     private final Integer numero;
-    private final boolean adulte;
     private Abonne reservePar;
     private Abonne empruntePar;
 
-    public Dvd(Integer numero, String titre, boolean adulte, Abonne empruntePar) {
+    public Doc(Integer numero, String titre) {
         this.numero = numero;
         this.titre = titre;
-        this.adulte = adulte;
         this.reservePar = null;
-        this.empruntePar = empruntePar;
-    }
-
-    public Dvd(Integer numero, String titre, Abonne reservePar, boolean adulte) {
-        this.numero = numero;
-        this.titre = titre;
-        this.adulte = adulte;
-        this.reservePar = reservePar;
         this.empruntePar = null;
     }
 
-    public Dvd(Integer numero, String titre, boolean adulte) {
+    public Doc(Integer numero, Abonne emprunt, String titre) {
         this.numero = numero;
         this.titre = titre;
-        this.adulte = adulte;
         this.reservePar = null;
+        this.empruntePar = emprunt;
+    }
+
+    public Doc(Integer numero, String titre, Abonne reservation) {
+        this.numero = numero;
+        this.titre = titre;
+        this.reservePar = reservation;
         this.empruntePar = null;
     }
 
@@ -55,6 +49,7 @@ public class Dvd implements Document{
     @Override
     public void reservation(Abonne ab) {
         try{
+            //TODO: travailler ici
             if(Connect.reservation(this, ab)){
                 empruntePar = null;
                 reservePar = ab;
@@ -95,17 +90,8 @@ public class Dvd implements Document{
     }
 
     public String toString() {
-        return "Dvd{" +
+        return  getClass().getName() + "{" +
                 "titre='" + titre + '\'' +
-                ", adulte=" + adulte +
                 '}';
-    }
-
-    public String titre() {
-        return titre;
-    }
-
-    public boolean pourAdulte() {
-        return adulte;
     }
 }

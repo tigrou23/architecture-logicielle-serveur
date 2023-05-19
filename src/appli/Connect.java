@@ -146,7 +146,8 @@ public class Connect {
             long differenceEnHeures = differenceEnMillisecondes / (60 * 60 * 1000);
             if (differenceEnHeures >= heureMax) {
                 if (annulerReservation(doc)) {
-                    System.out.println("La réservation du document : " + this + " a été annulée car le délai de récupération a été dépassé.");
+                    documentReserve.remove(doc);
+                    System.out.println("La réservation du document : " + doc + " a été annulée car le délai de récupération a été dépassé.");
                 } else {
                     System.err.println("Pb avec la base de données lors du retour.");
                 }
@@ -159,6 +160,12 @@ public class Connect {
         boolean bool = stmt.execute("SELECT annulerReservation(" + doc.numero() + ") from DUAL;");
         stmt.close();
         return bool;
+    }
+
+    public static String heureFinReservation(Document doc) {
+        long heureFinMillis = documentReserve.get(doc).getTime() + 2 * 60 * 60 * 1000; // Calculer l'heure de fin de réservation (2 heures plus tard)
+        SimpleDateFormat formatHeure = new SimpleDateFormat("HH:mm"); // Format d'affichage de l'heure
+        return "Ce document est réservé jusqu'à " + formatHeure.format(heureFinMillis);
     }
 
 }

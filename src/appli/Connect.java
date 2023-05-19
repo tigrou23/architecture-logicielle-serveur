@@ -16,6 +16,9 @@ public class Connect {
     private final String CONFIG_PATH = "src/ressources/config.properties";
     private static Connection conn;
 
+    private final int minuteVerif = 5;
+    private final int heureMax = 2;
+
     static{
         listeDocument = new HashMap<>();
         listeAbonne = new HashMap<>();
@@ -81,6 +84,11 @@ public class Connect {
         SimpleDateFormat formater = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         boolean bool = stmt.execute("SELECT reserver(" + doc.numero() + ", " + ab.numero() + ", '" + formater.format(aujourdhui) +"') from DUAL;");
         stmt.close();
+
+
+
+
+
         return bool;
     }
 
@@ -89,6 +97,13 @@ public class Connect {
         Date aujourdhui = new Date();
         SimpleDateFormat formater = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         boolean bool = stmt.execute("SELECT emprunter(" + doc.numero() + ", " + ab.numero() + ", '" + formater.format(aujourdhui) +"') from DUAL;");
+        stmt.close();
+        return bool;
+    }
+
+    public static boolean annulerReservation(Document doc) throws SQLException {
+        Statement stmt = conn.createStatement();
+        boolean bool = stmt.execute("SELECT annulerReservation(" + doc.numero() + ") from DUAL;");
         stmt.close();
         return bool;
     }

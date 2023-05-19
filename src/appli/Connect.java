@@ -12,16 +12,17 @@ import java.util.Date;
 
 public class Connect {
     private final static Map<Integer,Document> listeDocument;
+    private final static int heureMax = 2;
+    private final static int minuteVerif = 5;
     private final static Map<Integer,Abonne> listeAbonne;
-    private final String CONFIG_PATH = "src/ressources/config.properties";
+    private final static Map<Document,Date> documentReserve;
+    private final static String CONFIG_PATH = "src/ressources/config.properties";
     private static Connection conn;
-
-    private final int minuteVerif = 5;
-    private final int heureMax = 2;
 
     static{
         listeDocument = new HashMap<>();
         listeAbonne = new HashMap<>();
+        documentReserve = new HashMap<>();
     }
     public Connect(){
 
@@ -72,6 +73,18 @@ public class Connect {
             dvd_res.close();
             stmt.close();
 
+            Timer timer = new Timer();
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    try {
+                        verifierExpirationReservation();
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }, 0, minuteVerif * 60 * 1000);
+
             inputStream.close();
         }catch (Exception e){
             e.printStackTrace();
@@ -84,6 +97,7 @@ public class Connect {
         SimpleDateFormat formater = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         boolean bool = stmt.execute("SELECT reserver(" + doc.numero() + ", " + ab.numero() + ", '" + formater.format(aujourdhui) +"') from DUAL;");
         stmt.close();
+        documentReserve.put(doc, new Date());
         return bool;
     }
 
@@ -121,6 +135,30 @@ public class Connect {
 
     public static Map<Integer,Abonne> getListeAbonne() {
         return listeAbonne;
+    }
+
+    private void verifierExpirationReservation() throws SQLException {
+        for (Map.Entry<Document, Date> entry : documentReserve.entrySet()) {
+            Document doc = entry.getKey();
+            Date dateReservation = entry.getValue();
+            Date maintenant = new Date();
+            long differenceEnMillisecondes = maintenant.getTime() - dateReservation.getTime();
+            long differenceEnHeures = differenceEnMillisecondes / (60 * 60 * 1000);
+            if (differenceEnHeures >= heureMax) {
+                if (annulerReservation(doc)) {
+                    System.out.println("La réservation du document : " + this + " a été annulée car le délai de récupération a été dépassé.");
+                } else {
+                    System.err.println("Pb avec la base de données lors du retour.");
+                }
+            }
+        }
+    }
+
+    private boolean annulerReservation(Document doc) throws SQLException {
+        Statement stmt = conn.createStatement();
+        boolean bool = stmt.execute("SELECT annulerReservation(" + doc.numero() + ") from DUAL;");
+        stmt.close();
+        return bool;
     }
 
 }

@@ -42,7 +42,7 @@ public class ServiceEmprunt extends Service {
                     else{
                         if(Connect.getListeDocument().get(noDocument).reservePar() != null){
                             if(Connect.getListeDocument().get(noDocument).reservePar().numero() != client.numero()){
-                                reponse = Connect.getListeDocument().get(noDocument).heureFinReservation();
+                                reponse = "Document déjà reservé";
                             }else{
                                 if(type == Dvd.class){
                                     if(((Dvd) document).pourAdulte() && !client.estAdulte()){

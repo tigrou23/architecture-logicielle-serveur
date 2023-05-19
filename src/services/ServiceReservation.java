@@ -38,7 +38,7 @@ public class ServiceReservation extends Service {
                         reponse = "Document déjà emprunté";
                     }
                     else if (Connect.getListeDocument().get(noDocument).reservePar() != null){
-                        reponse = Connect.getListeDocument().get(noDocument).heureFinReservation();
+                        reponse = "Document déjà reservé";
                     }
                     else{
                         if(type == Dvd.class){

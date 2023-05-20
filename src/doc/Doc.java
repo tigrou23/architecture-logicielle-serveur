@@ -82,12 +82,9 @@ public abstract class Doc implements Document{
     @Override
     public void retour() {
         try{
-            if(Connect.retour(this)){
-                empruntePar = null;
-                reservePar = null;
-            }else{
-                System.err.println("Pb avec la base de données lors du retour.");
-            }
+            Connect.retour(this);
+            empruntePar = null;
+            reservePar = null;
         }catch (SQLException e){
             System.err.println("Pb avec la base de données lors du retour : " +  e);
         }

@@ -102,6 +102,9 @@ public class Connect {
     }
 
     public static boolean emprunt(Document doc, Abonne ab) throws SQLException {
+        if(documentReserve.containsKey(doc)){
+            documentReserve.remove(doc);
+        }
         Statement stmt = conn.createStatement();
         Date aujourdhui = new Date();
         SimpleDateFormat formater = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -111,6 +114,9 @@ public class Connect {
     }
 
     public static boolean retour(Document doc) throws SQLException {
+        if(documentReserve.containsKey(doc)){
+            documentReserve.remove(doc);
+        }
         Statement stmt = conn.createStatement();
         Date aujourdhui = new Date();
         SimpleDateFormat formater = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -138,6 +144,7 @@ public class Connect {
     }
 
     private void verifierExpirationReservation() throws SQLException {
+        ArrayList<Document> documentsARetourner = new ArrayList<>();
         for (Map.Entry<Document, Date> entry : documentReserve.entrySet()) {
             Document doc = entry.getKey();
             Date dateReservation = entry.getValue();
@@ -145,12 +152,15 @@ public class Connect {
             long differenceEnMillisecondes = maintenant.getTime() - dateReservation.getTime();
             long differenceEnHeures = differenceEnMillisecondes / (60 * 60 * 1000);
             if (differenceEnHeures >= heureMax) {
-                if (annulerReservation(doc)) {
-                    documentReserve.remove(doc);
-                    System.out.println("La réservation du document : " + doc + " a été annulée car le délai de récupération a été dépassé.");
-                } else {
-                    System.err.println("Pb avec la base de données lors du retour.");
-                }
+                documentsARetourner.add(doc);
+            }
+        }
+        for (Document doc : documentsARetourner) {
+            if (annulerReservation(doc)) {
+                doc.retour();
+                System.out.println("La réservation du document : " + doc + " a été annulée car le délai de récupération a été dépassé.");
+            } else {
+                System.err.println("Pb avec la base de données lors du retour.");
             }
         }
     }

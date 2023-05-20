@@ -24,6 +24,16 @@ public class Connect {
         listeAbonne = new HashMap<>();
         documentReserve = new HashMap<>();
     }
+
+    /**
+     * Constructeur de la classe Connect. Cette classe va permettre de se connecter à
+     * la base de données et de récupérer les données nécessaires au fonctionnement
+     * de l'application.
+
+     * Un Timer permettra de vérifer toutes les 5 minutes si un document est
+     * bien emprunté dans les 2 heures qui suivent la réservation.
+     */
+
     public Connect(){
 
         try{
@@ -91,6 +101,13 @@ public class Connect {
         }
     }
 
+    /**
+     * Méthode permettant d'effectuer une réservation sur un document directement en BBD
+     * @param doc Document à réserver
+     * @param ab Abonné qui réserve le document
+     * @return true si la réservation a été effectuée, false sinon
+     * @throws SQLException Exception SQL
+     */
     public static boolean reservation(Document doc, Abonne ab) throws SQLException {
         Statement stmt = conn.createStatement();
         Date aujourdhui = new Date();
@@ -101,6 +118,13 @@ public class Connect {
         return bool;
     }
 
+    /**
+     * Méthode permettant d'effectuer un emprunt sur un document directement en BBD
+     * @param doc Document à réserver
+     * @param ab Abonné qui réserve le document
+     * @return true si l'emprunt a été effectué, false sinon
+     * @throws SQLException Exception SQL
+     */
     public static boolean emprunt(Document doc, Abonne ab) throws SQLException {
         if(documentReserve.containsKey(doc)){
             documentReserve.remove(doc);
@@ -113,6 +137,12 @@ public class Connect {
         return bool;
     }
 
+    /**
+     * Méthode permettant d'effectuer un retour sur un document directement en BBD
+     * @param doc Document à réserver
+     * @return true si le retour a été effectué, false sinon
+     * @throws SQLException Exception SQL
+     */
     public static boolean retour(Document doc) throws SQLException {
         if(documentReserve.containsKey(doc)){
             documentReserve.remove(doc);
@@ -125,6 +155,9 @@ public class Connect {
         return bool;
     }
 
+    /**
+     * Méthode permettant de fermer la connexion à la base de données
+     */
     public void closeConnection() {
         try {
             if (conn != null && !conn.isClosed()) {
@@ -135,14 +168,11 @@ public class Connect {
         }
     }
 
-    public static Map<Integer,Document> getListeDocument() {
-        return listeDocument;
-    }
-
-    public static Map<Integer,Abonne> getListeAbonne() {
-        return listeAbonne;
-    }
-
+    /**
+     * Méthode permettant de vérifier si une réservation a expiré
+     * Si c'est le cas, on annule la réservation et on remet le document à disposition
+     * @throws SQLException Exception SQL
+     */
     private void verifierExpirationReservation() throws SQLException {
         ArrayList<Document> documentsARetourner = new ArrayList<>();
         for (Map.Entry<Document, Date> entry : documentReserve.entrySet()) {
@@ -165,6 +195,12 @@ public class Connect {
         }
     }
 
+    /**
+     * Méthode permettant d'annuler une réservation directement en BBD
+     * @param doc Document à annuler
+     * @return true si l'annulation a été effectuée, false sinon
+     * @throws SQLException Exception SQL
+     */
     private boolean annulerReservation(Document doc) throws SQLException {
         Statement stmt = conn.createStatement();
         boolean bool = stmt.execute("SELECT annulerReservation(" + doc.numero() + ") from DUAL;");
@@ -172,10 +208,23 @@ public class Connect {
         return bool;
     }
 
+    /**
+     * Méthode permettant de récupérer l'heure de fin de réservation d'un document
+     * @param doc Document dont on veut récupérer l'heure de fin de réservation
+     * @return L'heure de fin de réservation
+     */
     public static String heureFinReservation(Document doc) {
         long heureFinMillis = documentReserve.get(doc).getTime() + 2 * 60 * 60 * 1000; // Calculer l'heure de fin de réservation (2 heures plus tard)
         SimpleDateFormat formatHeure = new SimpleDateFormat("HH:mm"); // Format d'affichage de l'heure
         return "Ce document est réservé jusqu'à " + formatHeure.format(heureFinMillis);
+    }
+
+    public static Map<Integer,Document> getListeDocument() {
+        return listeDocument;
+    }
+
+    public static Map<Integer,Abonne> getListeAbonne() {
+        return listeAbonne;
     }
 
 }

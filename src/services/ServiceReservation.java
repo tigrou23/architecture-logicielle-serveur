@@ -32,7 +32,6 @@ public class ServiceReservation extends Service {
                 int noDocument = Integer.parseInt(Codage.decode(in.readLine()));
                 if (Connect.getListeDocument().containsKey(noDocument)){
                     Document document = Connect.getListeDocument().get(noDocument);
-                    //TODO : un peu bizarre de faire extends alors qu'on parle d'une interface
                     Class<? extends Document> type = document.getClass();
                     if (Connect.getListeDocument().get(noDocument).empruntePar() != null){
                         reponse = "Document déjà emprunté";

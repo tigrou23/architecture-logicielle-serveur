@@ -13,8 +13,6 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 
-//TODO: check le temps réservation/emprunt et prévenir du temps d'attente
-
 public class ServiceEmprunt extends Service {
     public ServiceEmprunt(Socket socket) {
         super(socket);
@@ -34,7 +32,6 @@ public class ServiceEmprunt extends Service {
                 int noDocument = Integer.parseInt(Codage.decode(in.readLine()));
                 if (Connect.getListeDocument().containsKey(noDocument)){
                     Document document = Connect.getListeDocument().get(noDocument);
-                    //TODO: un peu bizarre de faire extends alors qu'on parle d'une interface
                     Class<? extends Document> type = document.getClass();
                     if (Connect.getListeDocument().get(noDocument).empruntePar() != null){
                         reponse = "Document déjà emprunté";

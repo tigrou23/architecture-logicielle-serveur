@@ -7,14 +7,17 @@ import services.ServiceRetour;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.Properties;
 
 class Appli {
     private static final String CONFIG_PATH = "src/ressources/config.properties";
 
-
-    public static void main(String[] args) throws ClassNotFoundException, SQLException, IOException {
+    /**
+     * Méthode du serveur qui lance les services
+     * @param args non utilisé
+     * @throws IOException si les services ne peuvent pas être lancés
+     */
+    public static void main(String[] args) throws IOException {
 
         Properties properties = new Properties();
         FileInputStream inputStream = new FileInputStream(CONFIG_PATH);
@@ -32,11 +35,10 @@ class Appli {
 
             new Thread(new Serveur(ServiceRetour.class, PORT_RETOUR)).start();
             System.out.println("Service retour lancé sur le port " + PORT_RETOUR);
-
         } catch (IOException e) {
             System.err.println("Pb lors de la création du serveur : " +  e);
         }
         Connect connect = new Connect();
-        //connect.closeConnection();
+        //connect.closeConnection(); //TODO : à voir si on ferme la connexion
     }
 }

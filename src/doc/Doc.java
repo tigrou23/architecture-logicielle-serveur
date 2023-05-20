@@ -3,10 +3,6 @@ package doc;
 import appli.Connect;
 
 import java.sql.SQLException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public abstract class Doc implements Document{
     private final String titre;
@@ -53,7 +49,6 @@ public abstract class Doc implements Document{
     @Override
     public void reservation(Abonne ab) {
         try{
-            //TODO: travailler ici
             if(Connect.reservation(this, ab)){
                 empruntePar = null;
                 reservePar = ab;

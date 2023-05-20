@@ -1,12 +1,7 @@
 package doc.types;
 
-import appli.Connect;
 import doc.Abonne;
 import doc.Doc;
-
-import java.sql.Date;
-import java.sql.SQLException;
-
 
 public class Dvd extends Doc {
 
@@ -27,6 +22,9 @@ public class Dvd extends Doc {
         this.adulte = adulte;
     }
 
+    /**
+     * @return true si le document est un DVD pour adulte, false sinon
+     */
     public boolean pourAdulte() {
         return adulte;
     }

@@ -18,6 +18,9 @@ public class Abonne {
         this.dateNaissance = dateNaissance;
     }
 
+    /**
+     * @return true si l'abonné est majeur, false sinon
+     */
     public boolean estAdulte() {
         ZoneOffset zoneOffset = ZoneOffset.ofTotalSeconds(this.dateNaissance.getTimezoneOffset() * -60);
         Instant instant = Instant.ofEpochMilli(this.dateNaissance.getTime());
@@ -31,6 +34,10 @@ public class Abonne {
         return numero;
     }
 
+    public String nom() {
+        return nom;
+    }
+
     public String toString() {
         return "Abonne{" +
                 "numero=" + numero +
@@ -38,9 +45,5 @@ public class Abonne {
                 ", dateNaissance=" + dateNaissance +
                 ", majeur=" + estAdulte() +
                 '}';
-    }
-
-    public String nom() {
-        return nom;
     }
 }

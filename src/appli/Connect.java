@@ -69,11 +69,9 @@ public class Connect {
                 empruntePar = dvd_res.getInt(4);
                 if(reservePar != 0){
                     dvd = new Dvd(dvd_res.getInt(1), dvd_res.getString(2), dvd_res.getBoolean(3), listeAbonne.get(reservePar));
-                    System.out.println("reservation " + dvd);
                 }
                 else if(empruntePar != 0){
                     dvd = new Dvd(dvd_res.getInt(1), dvd_res.getString(2), listeAbonne.get(empruntePar),dvd_res.getBoolean(3));
-                    System.out.println("emprunt " + dvd);
                 }else{
                     dvd = new Dvd(dvd_res.getInt(1), dvd_res.getString(2), dvd_res.getBoolean(3));
                 }
@@ -217,6 +215,15 @@ public class Connect {
         long heureFinMillis = documentReserve.get(doc).getTime() + 2 * 60 * 60 * 1000; // Calculer l'heure de fin de réservation (2 heures plus tard)
         SimpleDateFormat formatHeure = new SimpleDateFormat("HH:mm"); // Format d'affichage de l'heure
         return "Ce document est réservé jusqu'à " + formatHeure.format(heureFinMillis);
+    }
+
+    public static String catalogue(){
+        StringBuilder sb = new StringBuilder();
+        sb.append("\nVoici les documents de la médiathèque :\n");
+        for (Document doc : listeDocument.values()){
+            sb.append(doc).append("\n");
+        }
+        return sb.toString();
     }
 
     public static Map<Integer,Document> getListeDocument() {

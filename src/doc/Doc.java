@@ -86,8 +86,7 @@ public abstract class Doc implements Document{
     }
 
     public String toString() {
-        return  getClass().getName() + "{" +
-                "titre='" + titre + '\'' +
-                '}';
+        return titre;
     }
+
 }

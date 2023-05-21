@@ -23,7 +23,10 @@ public class ServiceReservation extends Service {
         try {
             BufferedReader in = new BufferedReader(new InputStreamReader(getClient().getInputStream()));
             PrintWriter out = new PrintWriter(getClient().getOutputStream(), true);
-            out.println(Codage.encode("*** Bienvenue dans le client de réservation de document ***\n" + "Entrez votre numéro client : "));
+            String bienvenue = "*** Bienvenue dans le client de réservation de document ***\n";
+            bienvenue += Connect.catalogue();
+            bienvenue += "\nEntrez votre numéro d'abonné : ";
+            out.println(Codage.encode(bienvenue));
             int noClient = Integer.parseInt(Codage.decode(in.readLine()));
             String reponse = null;
             if (Connect.getListeAbonne().containsKey(noClient)){

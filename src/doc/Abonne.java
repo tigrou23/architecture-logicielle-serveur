@@ -27,7 +27,7 @@ public class Abonne {
         LocalDate dateNaissance = instant.atOffset(zoneOffset).toLocalDate();
         LocalDate aujourdHui = LocalDate.now();
         Period age = Period.between(dateNaissance, aujourdHui);
-        return age.getYears() >= 18;
+        return age.getYears() >= 16;
     }
 
     public int numero() {

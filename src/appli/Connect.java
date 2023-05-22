@@ -5,10 +5,21 @@ import doc.Document;
 import doc.types.Dvd;
 
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Date;
+
+import java.util.Properties;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.PasswordAuthentication;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
+
 
 public class Connect {
     private final static Map<Integer,Document> listeDocument;
@@ -16,6 +27,7 @@ public class Connect {
     private final static int minuteVerif = 5;
     private final static Map<Integer,Abonne> listeAbonne;
     private final static Map<Document,Date> documentReserve;
+    private final static Map<Document,ArrayList<Abonne>> documentPreReserve;
     private final static String CONFIG_PATH = "src/ressources/config.properties";
     private static Connection conn;
 
@@ -23,6 +35,7 @@ public class Connect {
         listeDocument = new HashMap<>();
         listeAbonne = new HashMap<>();
         documentReserve = new HashMap<>();
+        documentPreReserve = new HashMap<>();
     }
 
     /**
@@ -81,8 +94,8 @@ public class Connect {
             dvd_res.close();
             stmt.close();
 
-            Timer timer = new Timer();
-            timer.schedule(new TimerTask() {
+            Timer timer_verifierExpirationReservation = new Timer();
+            timer_verifierExpirationReservation.schedule(new TimerTask() {
                 @Override
                 public void run() {
                     try {
@@ -141,7 +154,7 @@ public class Connect {
      * @return true si le retour a été effectué, false sinon
      * @throws SQLException Exception SQL
      */
-    public static boolean retour(Document doc) throws SQLException {
+    public static boolean retour(Document doc) throws SQLException, IOException {
         if(documentReserve.containsKey(doc)){
             documentReserve.remove(doc);
         }
@@ -150,6 +163,9 @@ public class Connect {
         SimpleDateFormat formater = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         boolean bool = stmt.execute("SELECT rendre(" + doc.numero() + ", '" + formater.format(aujourdhui) +"') from DUAL;");
         stmt.close();
+        if(documentPreReserve.containsKey(doc)){
+            send(doc);
+        }
         return bool;
     }
 
@@ -217,13 +233,75 @@ public class Connect {
         return "Ce document est réservé jusqu'à " + formatHeure.format(heureFinMillis);
     }
 
+    /**
+     * Méthode permettant de récupérer le catalogue des documents
+     * @return le catalogue
+     */
     public static String catalogue(){
         StringBuilder sb = new StringBuilder();
         sb.append("\nVoici les documents de la médiathèque :\n");
         for (Document doc : listeDocument.values()){
-            sb.append(doc).append("\n");
+            sb.append(doc.numero()).append(" - ").append(doc).append("\n");
         }
         return sb.toString();
+    }
+
+    /**
+     * Ajouter à une hashmap les personnes qui attendent....
+     * @param abo Abonné intéressé par l'alerte
+     * @param doc Document qui intéresse l'abonné
+     */
+    public static void preReserver(Abonne abo, Document doc){
+        if(!documentPreReserve.containsKey(doc)){
+            ArrayList<Abonne> abonnes = new ArrayList<>();
+            abonnes.add(abo);
+            documentPreReserve.put(doc, abonnes);
+        }else{
+            documentPreReserve.get(doc).add(abo);
+        }
+    }
+
+    /**
+     * Envoie un e-mail en utilisant les paramètres SMTP spécifiés.
+     */
+    public static void send(Document doc) throws IOException {
+
+        ArrayList<Abonne> listeAbo = documentPreReserve.get(doc);
+
+        Properties properties = new Properties();
+        FileInputStream inputStream = new FileInputStream(CONFIG_PATH);
+        properties.load(inputStream);
+
+        Properties props = new Properties();
+        props.put("mail.smtp.host", properties.getProperty("smtp.host"));
+        props.put("mail.smtp.port", properties.getProperty("smtp.port"));
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.ssl.enable", "true");
+        props.put("mail.smtp.ssl.protocols", "TLSv1.2");
+
+        Session session = Session.getInstance(props, new javax.mail.Authenticator() {
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(properties.getProperty("smtp.userName"), properties.getProperty("smtp.password"));
+            }
+        });
+
+        try {
+            for (Abonne abo : listeAbo){
+                Message message = new MimeMessage(session);
+                message.setFrom(new InternetAddress(properties.getProperty("smtp.from")));
+                message.setRecipients(Message.RecipientType.TO, InternetAddress.parse("hugo0807pereira@gmail.com"));
+                message.setSubject("Alerte - Médiathèque");
+                message.setText("Bonjour " + abo.nom() + ",\n\n"
+                        + "Le document " + doc + " est disponible.\n\n"
+                        + "Cordialement,\n"
+                        + "L'équipe de la médiathèque.");
+                Transport.send(message);
+                System.out.println("Le message a été envoyé avec succès.");
+            }
+            documentPreReserve.remove(doc);
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        }
     }
 
     public static Map<Integer,Document> getListeDocument() {

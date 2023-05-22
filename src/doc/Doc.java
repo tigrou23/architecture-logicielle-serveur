@@ -2,6 +2,7 @@ package doc;
 
 import appli.Connect;
 
+import java.io.IOException;
 import java.sql.SQLException;
 
 public abstract class Doc implements Document{
@@ -82,6 +83,8 @@ public abstract class Doc implements Document{
             reservePar = null;
         }catch (SQLException e){
             System.err.println("Pb avec la base de données lors du retour : " +  e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 

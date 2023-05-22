@@ -37,7 +37,14 @@ public class ServiceReservation extends Service {
                     Document document = Connect.getListeDocument().get(noDocument);
                     Class<? extends Document> type = document.getClass();
                     if (Connect.getListeDocument().get(noDocument).empruntePar() != null){
-                        reponse = "Document déjà emprunté";
+                        out.println(Codage.encode("Ce document est déjà emprunté, voulez-vous avoir une alerte par mail quand il sera rendu ? (y/n)\n    -> "));
+                        String reponseAlerte = Codage.decode(in.readLine());
+                        if(reponseAlerte.equals("y")){
+                            Connect.preReserver(client, document);
+                            reponse = "Alerte programmée";
+                        }else{
+                            reponse = "OK, n'hésitez pas à recommencer si vous changez d'avis";
+                        }
                     }
                     else if (Connect.getListeDocument().get(noDocument).reservePar() != null){
                         reponse = Connect.heureFinReservation(Connect.getListeDocument().get(noDocument));

@@ -21,8 +21,10 @@ public class ServiceRetour extends Service {
         try {
             BufferedReader in = new BufferedReader(new InputStreamReader(getClient().getInputStream()));
             PrintWriter out = new PrintWriter(getClient().getOutputStream(), true);
-
-            out.println(Codage.encode("*** Bienvenue dans le client de retour de document ***\n" + "Entrez le numéro du document à retourner : "));
+            out.println(Codage.encode("""
+                    *** Bienvenue dans le client de retour de document ***
+                    Entrez le numéro du document à retourner :
+                        ->\s"""));
             int noDocument = Integer.parseInt(Codage.decode(in.readLine()));
 
             String reponse = "Document non existant";

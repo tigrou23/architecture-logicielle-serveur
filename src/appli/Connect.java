@@ -24,10 +24,12 @@ import javax.mail.internet.MimeMessage;
 public class Connect {
     private final static Map<Integer,Document> listeDocument;
     private final static int heureMax = 2;
+    private final static int moisExclusion = 1;
     private final static int minuteVerif = 5;
     private final static Map<Integer,Abonne> listeAbonne;
     private final static Map<Document,Date> documentReserve;
     private final static Map<Document,ArrayList<Abonne>> documentPreReserve;
+    private final static Map<Abonne,Date> abonneBanni;
     private final static String CONFIG_PATH = "src/ressources/config.properties";
     private static Connection conn;
 
@@ -36,6 +38,7 @@ public class Connect {
         listeAbonne = new HashMap<>();
         documentReserve = new HashMap<>();
         documentPreReserve = new HashMap<>();
+        abonneBanni = new HashMap<>();
     }
 
     /**
@@ -100,6 +103,7 @@ public class Connect {
                 public void run() {
                     try {
                         verifierExpirationReservation();
+                        verifierAbonneBanni();
                     } catch (SQLException e) {
                         throw new RuntimeException(e);
                     }
@@ -150,11 +154,14 @@ public class Connect {
 
     /**
      * Méthode permettant d'effectuer un retour sur un document directement en BBD
+     * Bannit l'abonné si le retour est tardif
      * @param doc Document à réserver
      * @return true si le retour a été effectué, false sinon
      * @throws SQLException Exception SQL
      */
     public static boolean retour(Document doc) throws SQLException, IOException {
+        if(retourTardif(doc.numero()))
+            abonneBanni.put(doc.empruntePar(), new Date());
         if(documentReserve.containsKey(doc)){
             documentReserve.remove(doc);
         }
@@ -207,6 +214,48 @@ public class Connect {
                 System.err.println("Pb avec la base de données lors du retour.");
             }
         }
+    }
+
+    /**
+     * Méthode permettant de retirer un abonné des bannis si le délai de bannissement est dépassé
+     */
+    private void verifierAbonneBanni(){
+        ArrayList<Abonne> abonnesARetirer = new ArrayList<>();
+        for (Map.Entry<Abonne, Date> entry : abonneBanni.entrySet()) {
+            Abonne ab = entry.getKey();
+            Date dateBanni = entry.getValue();
+            Date maintenant = new Date();
+            long differenceInMillis = Math.abs(maintenant.getTime() - dateBanni.getTime());
+            long differenceInMonths = differenceInMillis / (30L * 24L * 60L * 60L * 1000L);
+            if (differenceInMonths >= moisExclusion) {
+                abonnesARetirer.add(ab);
+            }
+        }
+        for (Abonne ab : abonnesARetirer) {
+            abonneBanni.remove(ab);
+        }
+    }
+
+    /**
+     * Méthode permettant de vérifier si un abonné est banni
+     * @param numeroAbonne Abonné à vérifier
+     * @return true si l'abonné est banni, false sinon
+     */
+    public static boolean estBanni(int numeroAbonne){
+        return abonneBanni.containsKey(listeAbonne.get(numeroAbonne));
+    }
+
+    /**
+     * Méthode permettant de récupérer la date de fin de bannissement d'un abonné
+     * @param numeroAbonne Abonné dont on veut récupérer la date de fin de bannissement
+     * @return Date de fin de bannissement
+     */
+    public static String getDateFinBan(int numeroAbonne){
+        Date date = abonneBanni.get(listeAbonne.get(numeroAbonne));
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.add(Calendar.MONTH, 1);
+        return calendar.getTime().toString();
     }
 
     /**
@@ -289,7 +338,7 @@ public class Connect {
             for (Abonne abo : listeAbo){
                 Message message = new MimeMessage(session);
                 message.setFrom(new InternetAddress(properties.getProperty("smtp.from")));
-                message.setRecipients(Message.RecipientType.TO, InternetAddress.parse("hugo0807pereira@gmail.com"));
+                message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(properties.getProperty("smtp.to")));
                 message.setSubject("Alerte - Médiathèque");
                 message.setText("Bonjour " + abo.nom() + ",\n\n"
                         + "Le document " + doc + " est disponible.\n\n"
@@ -302,6 +351,21 @@ public class Connect {
         } catch (MessagingException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Méthode permettant de vérifier si un document est rendu à temps
+     * @param doc Document à vérifier
+     * @return true si en retard, false sinon
+     */
+    private static boolean retourTardif(int doc) throws SQLException {
+        Statement stmt = conn.createStatement();
+        ResultSet result = stmt.executeQuery("SELECT retourTardif(" + doc + ") from DUAL;");
+        result.next();
+        boolean bool = result.getBoolean(1);
+        stmt.close();
+        result.close();
+        return bool;
     }
 
     public static Map<Integer,Document> getListeDocument() {

@@ -25,43 +25,48 @@ public class ServiceReservation extends Service {
             PrintWriter out = new PrintWriter(getClient().getOutputStream(), true);
             String bienvenue = "*** Bienvenue dans le client de réservation de document ***\n";
             bienvenue += Connect.catalogue();
-            bienvenue += "\nEntrez votre numéro d'abonné : ";
+            bienvenue += "\nEntrez votre numéro d'abonné :\n    -> ";
             out.println(Codage.encode(bienvenue));
             int noClient = Integer.parseInt(Codage.decode(in.readLine()));
             String reponse = null;
             if (Connect.getListeAbonne().containsKey(noClient)){
-                Abonne client = Connect.getListeAbonne().get(noClient);
-                out.println(Codage.encode("Bonjour " + client.nom() + "\nQuel est le document que vous voulez réserver?\n    -> "));
-                int noDocument = Integer.parseInt(Codage.decode(in.readLine()));
-                if (Connect.getListeDocument().containsKey(noDocument)){
-                    Document document = Connect.getListeDocument().get(noDocument);
-                    Class<? extends Document> type = document.getClass();
-                    if (Connect.getListeDocument().get(noDocument).empruntePar() != null){
-                        out.println(Codage.encode("Ce document est déjà emprunté, voulez-vous avoir une alerte par mail quand il sera rendu ? (y/n)\n    -> "));
-                        String reponseAlerte = Codage.decode(in.readLine());
-                        if(reponseAlerte.equals("y")){
-                            Connect.preReserver(client, document);
-                            reponse = "Alerte programmée";
-                        }else{
-                            reponse = "OK, n'hésitez pas à recommencer si vous changez d'avis";
-                        }
-                    }
-                    else if (Connect.getListeDocument().get(noDocument).reservePar() != null){
-                        reponse = Connect.heureFinReservation(Connect.getListeDocument().get(noDocument));
-                    }
-                    else{
-                        if(type == Dvd.class){
-                            if(((Dvd) document).pourAdulte() && !client.estAdulte()){
-                                reponse = "Vous ne semblez pas avoir l'âge requis pour ce DVD...";
+                if(!Connect.estBanni(noClient)){
+                    Abonne client = Connect.getListeAbonne().get(noClient);
+                    out.println(Codage.encode("Bonjour " + client.nom() + "\nQuel est le document que vous voulez réserver?\n    -> "));
+                    int noDocument = Integer.parseInt(Codage.decode(in.readLine()));
+                    if (Connect.getListeDocument().containsKey(noDocument)){
+                        Document document = Connect.getListeDocument().get(noDocument);
+                        Class<? extends Document> type = document.getClass();
+                        if (Connect.getListeDocument().get(noDocument).empruntePar() != null){
+                            out.println(Codage.encode("Ce document est déjà emprunté, voulez-vous avoir une alerte par mail quand il sera rendu ? (y/n)\n    -> "));
+                            String reponseAlerte = Codage.decode(in.readLine());
+                            if(reponseAlerte.equals("y")){
+                                Connect.preReserver(client, document);
+                                reponse = "Alerte programmée";
                             }else{
-                                document.reservation(client);
-                                reponse = "Document réservé";
+                                reponse = "OK, n'hésitez pas à recommencer si vous changez d'avis";
+                            }
+                        }
+                        else if (Connect.getListeDocument().get(noDocument).reservePar() != null){
+                            reponse = Connect.heureFinReservation(Connect.getListeDocument().get(noDocument));
+                        }
+                        else{
+                            if(type == Dvd.class){
+                                if(((Dvd) document).pourAdulte() && !client.estAdulte()){
+                                    reponse = "Vous ne semblez pas avoir l'âge requis pour ce DVD...";
+                                }else{
+                                    document.reservation(client);
+                                    reponse = "Document réservé";
+                                }
                             }
                         }
                     }
+                    else{
+                        reponse = "Document non existant";
+                    }
                 }
-                else{
-                    reponse = "Document non existant";
+                else {
+                    reponse = "Vous êtes banni, vous ne pouvez pas réserver de document jusqu'au " + Connect.getDateFinBan(noClient) + "";
                 }
             }
             else{

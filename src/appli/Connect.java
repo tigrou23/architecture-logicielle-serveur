@@ -125,7 +125,9 @@ public class Connect {
         SimpleDateFormat formater = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         boolean bool = stmt.execute("SELECT reserver(" + doc.numero() + ", " + ab.numero() + ", '" + formater.format(aujourdhui) +"') from DUAL;");
         stmt.close();
-        documentReserve.put(doc, new Date());
+        synchronized (documentReserve){
+            documentReserve.put(doc, new Date());
+        }
         return bool;
     }
 
@@ -137,8 +139,10 @@ public class Connect {
      * @throws SQLException Exception SQL
      */
     public static boolean emprunt(Document doc, Abonne ab) throws SQLException {
-        if(documentReserve.containsKey(doc)){
-            documentReserve.remove(doc);
+        synchronized (documentReserve){
+            if(documentReserve.containsKey(doc)){
+                documentReserve.remove(doc);
+            }
         }
         Statement stmt = conn.createStatement();
         Date aujourdhui = new Date();
@@ -155,8 +159,10 @@ public class Connect {
      * @throws SQLException Exception SQL
      */
     public static boolean retour(Document doc) throws SQLException, IOException {
-        if(documentReserve.containsKey(doc)){
-            documentReserve.remove(doc);
+        synchronized (documentReserve){
+            if(documentReserve.containsKey(doc)){
+                documentReserve.remove(doc);
+            }
         }
         Statement stmt = conn.createStatement();
         Date aujourdhui = new Date();
@@ -189,22 +195,28 @@ public class Connect {
      */
     private void verifierExpirationReservation() throws SQLException {
         ArrayList<Document> documentsARetourner = new ArrayList<>();
-        for (Map.Entry<Document, Date> entry : documentReserve.entrySet()) {
-            Document doc = entry.getKey();
-            Date dateReservation = entry.getValue();
-            Date maintenant = new Date();
-            long differenceEnMillisecondes = maintenant.getTime() - dateReservation.getTime();
-            long differenceEnHeures = differenceEnMillisecondes / (60 * 60 * 1000);
-            if (differenceEnHeures >= heureMax) {
-                documentsARetourner.add(doc);
+        synchronized (documentReserve){
+            for (Map.Entry<Document, Date> entry : documentReserve.entrySet()) {
+                Document doc = entry.getKey();
+                Date dateReservation = entry.getValue();
+                Date maintenant = new Date();
+                long differenceEnMillisecondes = maintenant.getTime() - dateReservation.getTime();
+                long differenceEnHeures = differenceEnMillisecondes / (60 * 60 * 1000);
+                if (differenceEnHeures >= heureMax) {
+                    synchronized (documentsARetourner){
+                        documentsARetourner.add(doc);
+                    }
+                }
             }
         }
-        for (Document doc : documentsARetourner) {
-            if (annulerReservation(doc)) {
-                doc.retour();
-                System.out.println("La réservation du document : " + doc + " a été annulée car le délai de récupération a été dépassé.");
-            } else {
-                System.err.println("Pb avec la base de données lors du retour.");
+        synchronized (documentsARetourner){
+            for (Document doc : documentsARetourner) {
+                if (annulerReservation(doc)) {
+                    doc.retour();
+                    System.out.println("La réservation du document : " + doc + " a été annulée car le délai de récupération a été dépassé.");
+                } else {
+                    System.err.println("Pb avec la base de données lors du retour.");
+                }
             }
         }
     }

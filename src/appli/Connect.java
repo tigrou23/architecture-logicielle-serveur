@@ -6,6 +6,7 @@ import doc.types.Dvd;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -19,6 +20,7 @@ import javax.mail.MessagingException;
 import javax.mail.PasswordAuthentication;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import javax.sound.sampled.*;
 
 
 public class Connect {
@@ -37,6 +39,10 @@ public class Connect {
         documentReserve = new HashMap<>();
         documentPreReserve = new HashMap<>();
     }
+
+    //Attributs Musique
+    private static Mixer mixer;
+    private static Clip clip;
 
     /**
      * Constructeur de la classe Connect. Cette classe va permettre de se connecter à
@@ -109,6 +115,39 @@ public class Connect {
             inputStream.close();
         }catch (Exception e){
             e.printStackTrace();
+        }
+
+        //Chargement de la musique
+        Mixer.Info[] mixInfos = AudioSystem.getMixerInfo();
+
+        mixer = null;
+        for (Mixer.Info info : mixInfos) {
+            if (info.getDescription().contains("Direct Audio Device")) {
+                mixer = AudioSystem.getMixer(info);
+                break;
+            }
+        }
+
+        if (mixer == null) {
+            System.err.println("Aucun mixeur compatible trouvé.");
+            return;
+        }
+
+        DataLine.Info dataInfo = new DataLine.Info(Clip.class, null);
+        try{ clip = (Clip) mixer.getLine(dataInfo);}
+        catch (LineUnavailableException e) {e.printStackTrace();}
+
+
+        try{
+            URL soundURL = Appli.class.getResource("/music/MusiqueCeleste.wav");
+            AudioInputStream audioStream = AudioSystem.getAudioInputStream(soundURL);
+            clip.open(audioStream);
+        } catch (UnsupportedAudioFileException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (LineUnavailableException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -242,7 +281,19 @@ public class Connect {
     public static String heureFinReservation(Document doc) {
         long heureFinMillis = documentReserve.get(doc).getTime() + 2 * 60 * 60 * 1000; // Calculer l'heure de fin de réservation (2 heures plus tard)
         SimpleDateFormat formatHeure = new SimpleDateFormat("HH:mm"); // Format d'affichage de l'heure
+        musiqueAttente();
         return "Ce document est réservé jusqu'à " + formatHeure.format(heureFinMillis);
+    }
+
+    public static void musiqueAttente(){
+        clip.start();
+        do{
+            try{
+                Thread.sleep(50);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }while(clip.isActive());
     }
 
     /**

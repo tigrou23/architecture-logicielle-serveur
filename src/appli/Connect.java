@@ -6,6 +6,8 @@ import doc.types.Dvd;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.File;
+
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -19,6 +21,7 @@ import javax.mail.MessagingException;
 import javax.mail.PasswordAuthentication;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+
 
 
 public class Connect {
@@ -279,9 +282,27 @@ public class Connect {
     public static String heureFinReservation(Document doc) {
         long heureFinMillis = documentReserve.get(doc).getTime() + 2 * 60 * 60 * 1000; // Calculer l'heure de fin de réservation (2 heures plus tard)
         SimpleDateFormat formatHeure = new SimpleDateFormat("HH:mm"); // Format d'affichage de l'heure
+        attenteMusic();
         return "Ce document est réservé jusqu'à " + formatHeure.format(heureFinMillis);
     }
+    public static void attenteMusic(){
+        String filePath = "chemin_vers_le_fichier.mp3";
+        byte[] musicData = readMusicFile(filePath);
+        // Maintenant, vous pouvez envoyer le tableau de bytes contenant les données musicales à travers le réseau ou d'autres moyens de communication.
+    }
 
+    private static byte[] readMusicFile(String filePath) {
+        File file = new File(filePath);
+        byte[] musicData = new byte[(int) file.length()];
+
+        try (FileInputStream fis = new FileInputStream(file)) {
+            fis.read(musicData);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return musicData;
+    }
     /**
      * Méthode permettant de récupérer le catalogue des documents
      * @return le catalogue

@@ -3,6 +3,7 @@
     <CLASSES>
       <root url="jar://$PROJECT_DIR$/src/librairies/mailapi.jar!/" />
       <root url="jar://$PROJECT_DIR$/src/librairies/smtp.jar!/" />
+      <root url="jar://$PROJECT_DIR$/src/librairies/bttp3.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

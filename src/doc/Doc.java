@@ -11,21 +11,21 @@ public abstract class Doc implements Document{
     private Abonne reservePar;
     private Abonne empruntePar;
 
-    public Doc(Integer numero, String titre) {
+    protected Doc(Integer numero, String titre) {
         this.numero = numero;
         this.titre = titre;
         this.reservePar = null;
         this.empruntePar = null;
     }
 
-    public Doc(Integer numero, Abonne emprunt, String titre) {
+    protected Doc(Integer numero, Abonne emprunt, String titre) {
         this.numero = numero;
         this.titre = titre;
         this.reservePar = null;
         this.empruntePar = emprunt;
     }
 
-    public Doc(Integer numero, String titre, Abonne reservation) {
+    protected Doc(Integer numero, String titre, Abonne reservation) {
         this.numero = numero;
         this.titre = titre;
         this.reservePar = reservation;

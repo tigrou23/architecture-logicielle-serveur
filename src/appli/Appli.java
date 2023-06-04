@@ -39,6 +39,5 @@ class Appli {
             System.err.println("Pb lors de la création du serveur : " +  e);
         }
         Connect connect = new Connect();
-        //connect.closeConnection(); //TODO : à voir si on ferme la connexion
     }
 }

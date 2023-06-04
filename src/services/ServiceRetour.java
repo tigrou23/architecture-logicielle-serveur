@@ -4,10 +4,7 @@ import appli.Connect;
 import codage.Codage;
 import serveur.Service;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 
 public class ServiceRetour extends Service {
@@ -19,13 +16,15 @@ public class ServiceRetour extends Service {
     @Override
     public void run() {
         try {
-            BufferedReader in = new BufferedReader(new InputStreamReader(getClient().getInputStream()));
+            InputStream in = getClient().getInputStream();
             PrintWriter out = new PrintWriter(getClient().getOutputStream(), true);
             out.println(Codage.encode("""
                     *** Bienvenue dans le client de retour de document ***
                     Entrez le numéro du document à retourner :
-                        ->\s"""));
-            int noDocument = Integer.parseInt(Codage.decode(in.readLine()));
+                        ->\s""",0));
+            byte[] tableau = new byte[1024];
+            int taille = in.read(tableau);
+            int noDocument = Integer.parseInt(Codage.decode(tableau,taille));
 
             String reponse = "Document non existant";
 
@@ -46,7 +45,8 @@ public class ServiceRetour extends Service {
         }
         try {
             getClient().close();
-        } catch (IOException e2) {
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

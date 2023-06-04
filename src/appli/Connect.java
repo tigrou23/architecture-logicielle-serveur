@@ -6,7 +6,6 @@ import doc.types.Dvd;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.File;
 
 import java.sql.*;
 import java.text.SimpleDateFormat;
@@ -14,6 +13,8 @@ import java.util.*;
 import java.util.Date;
 
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.Message;
@@ -25,23 +26,23 @@ import javax.mail.internet.MimeMessage;
 
 
 public class Connect {
-    private final static Map<Integer,Document> listeDocument;
-    private final static int heureMax = 2;
-    private final static int moisExclusion = 1;
-    private final static int minuteVerif = 5;
-    private final static Map<Integer,Abonne> listeAbonne;
-    private final static Map<Document,Date> documentReserve;
-    private final static Map<Document,ArrayList<Abonne>> documentPreReserve;
-    private final static Map<Abonne,Date> abonneBanni;
-    private final static String CONFIG_PATH = "src/ressources/config.properties";
+    private static final ConcurrentMap<Integer,Document> listeDocument;
+    private static final int heureMax = 2;
+    private static final int moisExclusion = 1;
+    private static final int minuteVerif = 5;
+    private static final ConcurrentMap<Integer,Abonne> listeAbonne;
+    private static final ConcurrentMap<Document,Date> documentReserve;
+    private static final ConcurrentMap<Document,ArrayList<Abonne>> documentPreReserve;
+    private static final ConcurrentMap<Abonne,Date> abonneBanni;
+    private static final String CONFIG_PATH = "src/ressources/config.properties";
     private static Connection conn;
 
     static{
-        listeDocument = new HashMap<>();
-        listeAbonne = new HashMap<>();
-        documentReserve = new HashMap<>();
-        documentPreReserve = new HashMap<>();
-        abonneBanni = new HashMap<>();
+        listeDocument = new ConcurrentHashMap<>();
+        listeAbonne = new ConcurrentHashMap<>();
+        documentReserve = new ConcurrentHashMap<>();
+        documentPreReserve = new ConcurrentHashMap<>();
+        abonneBanni = new ConcurrentHashMap<>();
     }
 
     /**
@@ -111,7 +112,7 @@ public class Connect {
                         throw new RuntimeException(e);
                     }
                 }
-            }, 0, minuteVerif * 60 * 1000);
+            }, 0, minuteVerif * 60000);
 
             inputStream.close();
         }catch (Exception e){
@@ -197,7 +198,7 @@ public class Connect {
      * Si c'est le cas, on annule la réservation et on remet le document à disposition
      * @throws SQLException Exception SQL
      */
-    private void verifierExpirationReservation() throws SQLException {
+    public static void verifierExpirationReservation() throws SQLException {
         ArrayList<Document> documentsARetourner = new ArrayList<>();
         for (Map.Entry<Document, Date> entry : documentReserve.entrySet()) {
             Document doc = entry.getKey();
@@ -267,7 +268,7 @@ public class Connect {
      * @return true si l'annulation a été effectuée, false sinon
      * @throws SQLException Exception SQL
      */
-    private boolean annulerReservation(Document doc) throws SQLException {
+    private static boolean annulerReservation(Document doc) throws SQLException {
         Statement stmt = conn.createStatement();
         boolean bool = stmt.execute("SELECT annulerReservation(" + doc.numero() + ") from DUAL;");
         stmt.close();
@@ -276,33 +277,14 @@ public class Connect {
 
     /**
      * Méthode permettant de récupérer l'heure de fin de réservation d'un document
+     *
      * @param doc Document dont on veut récupérer l'heure de fin de réservation
      * @return L'heure de fin de réservation
      */
-    public static String heureFinReservation(Document doc) {
-        long heureFinMillis = documentReserve.get(doc).getTime() + 2 * 60 * 60 * 1000; // Calculer l'heure de fin de réservation (2 heures plus tard)
-        SimpleDateFormat formatHeure = new SimpleDateFormat("HH:mm"); // Format d'affichage de l'heure
-        attenteMusic();
-        return "Ce document est réservé jusqu'à " + formatHeure.format(heureFinMillis);
-    }
-    public static void attenteMusic(){
-        String filePath = "chemin_vers_le_fichier.mp3";
-        byte[] musicData = readMusicFile(filePath);
-        // Maintenant, vous pouvez envoyer le tableau de bytes contenant les données musicales à travers le réseau ou d'autres moyens de communication.
+    public static long heureFinReservation(Document doc) {
+        return documentReserve.get(doc).getTime() + 2 * 60 * 60 * 1000;
     }
 
-    private static byte[] readMusicFile(String filePath) {
-        File file = new File(filePath);
-        byte[] musicData = new byte[(int) file.length()];
-
-        try (FileInputStream fis = new FileInputStream(file)) {
-            fis.read(musicData);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return musicData;
-    }
     /**
      * Méthode permettant de récupérer le catalogue des documents
      * @return le catalogue
@@ -350,6 +332,7 @@ public class Connect {
         props.put("mail.smtp.ssl.protocols", "TLSv1.2");
 
         Session session = Session.getInstance(props, new javax.mail.Authenticator() {
+            @Override
             protected PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication(properties.getProperty("smtp.userName"), properties.getProperty("smtp.password"));
             }

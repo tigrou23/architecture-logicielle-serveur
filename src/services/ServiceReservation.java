@@ -126,10 +126,6 @@ public class ServiceReservation extends Service {
                                     reponse = "OK, n'hésitez pas à recommencer si vous changez d'avis";
                                 }
                             }
-                            else{
-                                out.write(Codage.encode(reponse,0));
-                                out.flush();
-                            }
                         }
                         else{
                             if(type == Dvd.class){

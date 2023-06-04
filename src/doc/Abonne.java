@@ -11,6 +11,7 @@ public class Abonne {
     private final int numero;
     private final String nom;
     private final Date dateNaissance;
+    private static final int AGE_MAJORITE = 16;
 
     public Abonne(int numero, String nom, Date dateNaissance) {
         this.numero = numero;
@@ -27,7 +28,7 @@ public class Abonne {
         LocalDate dateNaissance = instant.atOffset(zoneOffset).toLocalDate();
         LocalDate aujourdHui = LocalDate.now();
         Period age = Period.between(dateNaissance, aujourdHui);
-        return age.getYears() >= 16;
+        return age.getYears() >= AGE_MAJORITE;
     }
 
     public int numero() {

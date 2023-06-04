@@ -50,11 +50,13 @@ public abstract class Doc implements Document{
     @Override
     public void reservation(Abonne ab) {
         try{
-            if(Connect.reservation(this, ab)){
-                empruntePar = null;
-                reservePar = ab;
-            }else{
-                System.err.println("Pb avec la base de données lors du retour.");
+            synchronized (this){
+                if(Connect.reservation(this, ab)){
+                    empruntePar = null;
+                    reservePar = ab;
+                }else{
+                    System.err.println("Pb avec la base de données lors du retour.");
+                }
             }
         }catch (SQLException e){
             System.err.println("Pb avec la base de données lors du retour : " +  e);
@@ -64,11 +66,13 @@ public abstract class Doc implements Document{
     @Override
     public void emprunt(Abonne ab) {
         try{
-            if(Connect.emprunt(this, ab)){
-                empruntePar = ab;
-                reservePar = null;
-            }else{
-                System.err.println("Pb avec la base de données lors du retour.");
+            synchronized (this){
+                if(Connect.emprunt(this, ab)){
+                    empruntePar = ab;
+                    reservePar = null;
+                }else{
+                    System.err.println("Pb avec la base de données lors du retour.");
+                }
             }
         }catch (SQLException e){
             System.err.println("Pb avec la base de données lors du retour : " +  e);
@@ -78,9 +82,11 @@ public abstract class Doc implements Document{
     @Override
     public void retour() {
         try{
-            Connect.retour(this);
-            empruntePar = null;
-            reservePar = null;
+            synchronized (this){
+                Connect.retour(this);
+                empruntePar = null;
+                reservePar = null;
+            }
         }catch (SQLException e){
             System.err.println("Pb avec la base de données lors du retour : " +  e);
         } catch (IOException e) {

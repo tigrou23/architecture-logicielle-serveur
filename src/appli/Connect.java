@@ -14,6 +14,8 @@ import java.util.*;
 import java.util.Date;
 
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.Message;
@@ -25,23 +27,23 @@ import javax.mail.internet.MimeMessage;
 
 
 public class Connect {
-    private final static Map<Integer,Document> listeDocument;
+    private final static ConcurrentMap<Integer,Document> listeDocument;
     private final static int heureMax = 2;
     private final static int moisExclusion = 1;
     private final static int minuteVerif = 5;
-    private final static Map<Integer,Abonne> listeAbonne;
-    private final static Map<Document,Date> documentReserve;
-    private final static Map<Document,ArrayList<Abonne>> documentPreReserve;
-    private final static Map<Abonne,Date> abonneBanni;
+    private final static ConcurrentMap<Integer,Abonne> listeAbonne;
+    private final static ConcurrentMap<Document,Date> documentReserve;
+    private final static ConcurrentMap<Document,ArrayList<Abonne>> documentPreReserve;
+    private final static ConcurrentMap<Abonne,Date> abonneBanni;
     private final static String CONFIG_PATH = "src/ressources/config.properties";
     private static Connection conn;
 
     static{
-        listeDocument = new HashMap<>();
-        listeAbonne = new HashMap<>();
-        documentReserve = new HashMap<>();
-        documentPreReserve = new HashMap<>();
-        abonneBanni = new HashMap<>();
+        listeDocument = new ConcurrentHashMap<>();
+        listeAbonne = new ConcurrentHashMap<>();
+        documentReserve = new ConcurrentHashMap<>();
+        documentPreReserve = new ConcurrentHashMap<>();
+        abonneBanni = new ConcurrentHashMap<>();
     }
 
     /**
@@ -197,7 +199,7 @@ public class Connect {
      * Si c'est le cas, on annule la réservation et on remet le document à disposition
      * @throws SQLException Exception SQL
      */
-    private void verifierExpirationReservation() throws SQLException {
+    public static void verifierExpirationReservation() throws SQLException {
         ArrayList<Document> documentsARetourner = new ArrayList<>();
         for (Map.Entry<Document, Date> entry : documentReserve.entrySet()) {
             Document doc = entry.getKey();
@@ -267,7 +269,7 @@ public class Connect {
      * @return true si l'annulation a été effectuée, false sinon
      * @throws SQLException Exception SQL
      */
-    private boolean annulerReservation(Document doc) throws SQLException {
+    private static boolean annulerReservation(Document doc) throws SQLException {
         Statement stmt = conn.createStatement();
         boolean bool = stmt.execute("SELECT annulerReservation(" + doc.numero() + ") from DUAL;");
         stmt.close();
@@ -276,14 +278,13 @@ public class Connect {
 
     /**
      * Méthode permettant de récupérer l'heure de fin de réservation d'un document
+     *
      * @param doc Document dont on veut récupérer l'heure de fin de réservation
      * @return L'heure de fin de réservation
      */
-    public static String heureFinReservation(Document doc) {
+    public static long heureFinReservation(Document doc) {
         long heureFinMillis = documentReserve.get(doc).getTime() + 2 * 60 * 60 * 1000; // Calculer l'heure de fin de réservation (2 heures plus tard)
-        SimpleDateFormat formatHeure = new SimpleDateFormat("HH:mm"); // Format d'affichage de l'heure
-        attenteMusic();
-        return "Ce document est réservé jusqu'à " + formatHeure.format(heureFinMillis);
+        return heureFinMillis;
     }
     public static void attenteMusic(){
         String filePath = "chemin_vers_le_fichier.mp3";

@@ -7,10 +7,7 @@ import doc.Document;
 import doc.types.Dvd;
 import serveur.Service;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 
 public class ServiceEmprunt extends Service {
@@ -21,19 +18,23 @@ public class ServiceEmprunt extends Service {
     @Override
     public void run() {
         try {
-            BufferedReader in = new BufferedReader(new InputStreamReader(getClient().getInputStream()));
+            InputStream in = getClient().getInputStream();
             PrintWriter out = new PrintWriter(getClient().getOutputStream(), true);
             out.println(Codage.encode("""
                     *** Bienvenue dans le client d'emprunt de document ***
                     Entrez votre numéro client :
-                        ->\s"""));
-            int noClient = Integer.parseInt(Codage.decode(in.readLine()));
+                        ->\s""",0));
+            byte[] tableau = new byte[1024];
+            int taille = in.read(tableau);
+            int noClient = Integer.parseInt(Codage.decode(tableau,taille));
             String reponse = null;
             if (Connect.getListeAbonne().containsKey(noClient)){
                 if(!Connect.estBanni(noClient)){
                     Abonne client = Connect.getListeAbonne().get(noClient);
-                    out.println(Codage.encode("Bonjour " + client.nom() + "\nQuel est le document que vous voulez emprunter?\n    -> "));
-                    int noDocument = Integer.parseInt(Codage.decode(in.readLine()));
+                    out.println(Codage.encode("Bonjour " + client.nom() + "\nQuel est le document que vous voulez emprunter?\n    -> ",0));
+                    byte[] tableau1 = new byte[1024];
+                    int taille1 = in.read(tableau1);
+                    int noDocument = Integer.parseInt(Codage.decode(tableau,taille1));
                     if (Connect.getListeDocument().containsKey(noDocument)){
                         Document document = Connect.getListeDocument().get(noDocument);
                         Class<? extends Document> type = document.getClass();
@@ -43,7 +44,8 @@ public class ServiceEmprunt extends Service {
                         else{
                             if(Connect.getListeDocument().get(noDocument).reservePar() != null){
                                 if(Connect.getListeDocument().get(noDocument).reservePar().numero() != client.numero()){
-                                    reponse = Connect.heureFinReservation(Connect.getListeDocument().get(noDocument));
+                                    long attente = Connect.heureFinReservation(Connect.getListeDocument().get(noDocument));
+                                    reponse = "Ce document est réservé jusqu'à " + attente;
                                 }else{
                                     if(type == Dvd.class){
                                         if(((Dvd) document).pourAdulte() && !client.estAdulte()){

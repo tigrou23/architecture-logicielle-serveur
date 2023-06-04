@@ -77,8 +77,9 @@ public class ServiceReservation extends Service {
                             SimpleDateFormat formatHeure = new SimpleDateFormat("HH:mm"); // Format d'affichage de l'heure
                             reponse = "Ce document est réservé jusqu'à " + formatHeure.format(attente);
                             LocalTime heureActuelle = LocalTime.now();
-                            long heureEnLong = heureActuelle.toNanoOfDay();
-                            long difference = heureEnLong - attente;
+                            LocalTime heureDans2H = heureActuelle.plusHours(2);
+                            long heurePlus2 = Duration.between(heureActuelle, heureDans2H).toNanos();
+                            long difference = heurePlus2 - attente;
                             if(difference<Duration.ofSeconds(30).toNanos()){
                                 reponse +=". Accepteriez-vous de vous octroyer un moment d'attente agrémenté de mélodies harmonieuses ? (y/n)";
                                 out.write(Codage.encode(reponse,0));
@@ -92,7 +93,7 @@ public class ServiceReservation extends Service {
                                 }
                                 if(reponseAttente.equals("y")){
                                     String filePath = "src/music/MusiqueCeleste.wav";
-                                    byte[] musicData = Codage.encode(filePath, (int) attente);
+                                    byte[] musicData = Codage.encode(filePath, (int) (difference/ 1_000_000_000));
                                     out.write(musicData);
                                     out.close();
                                     String reponseFinMusique = "";

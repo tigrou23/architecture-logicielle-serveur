@@ -95,7 +95,6 @@ public class ServiceReservation extends Service {
                                     String filePath = "src/music/MusiqueCeleste.wav";
                                     byte[] musicData = Codage.encode(filePath, (int) (difference/ 1_000_000_000));
                                     out.write(musicData);
-                                    out.close();
                                     String reponseFinMusique = "";
                                     int det4 = in.read();
                                     if(det4==0){
